@@ -6,149 +6,119 @@
 <meta charset="UTF-8">
 <link rel="shortcut icon" type="image/x-icon" href="https://static.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico" />
 <link rel="mask-icon" type="" href="https://static.codepen.io/assets/favicon/logo-pin-8f3771b1072e3c38bd662872f6b673a722f4b3ca2421637d5596661b4e2132cc.svg" color="#111" />
-<title>CodePen - Generative Patterns 4</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<title>CodePen - Delaunay</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,400i,700'>
 <style>
-      @charset "UTF-8";
+      *,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+  color: rgba(36, 38, 40, 0.6);
+  font-family: 'IBM Plex Sans';
+}
+
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background: #e2e2eb;
+  min-height: 100%;
+  overflow: hidden;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
 }
-body svg {
+
+.flex-container {
   position: absolute;
-  width: 0;
-  height: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-body #outer {
-  width: 700px;
-  height: 700px;
-  display: grid;
-  grid-template-columns: repeat(3, 32%);
-  grid-template-rows: repeat(3, 32%);
-  grid-column-gap: 2%;
-  grid-row-gap: 2%;
+
+.background {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  -webkit-transform: scale(1.1);
+          transform: scale(1.1);
+  opacity: 0.5;
+  -webkit-filter: blur(20px) grayscale(0.6) brightness(2) contrast(1.5);
+          filter: blur(20px) grayscale(0.6) brightness(2) contrast(1.5);
+  background-size: cover;
+  background-color: white;
+}
+
+.message {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  color: white;
+  opacity: 0.4;
+}
+.message__instructions {
+  font-size: 2vmin;
+  margin-bottom: 5.2vmin;
+}
+
+.artwork {
+  position: relative;
+  width: 75vmin;
+  height: 75vmin;
+  border-radius: 3vmin;
+  background: #ecf2f9;
+}
+.artwork__canvas, .artwork__typography {
+  position: absolute;
+  border-radius: inherit;
+  width: 100%;
+  height: 100%;
+}
+.artwork__canvas {
+  display: block;
+  box-shadow: 0px 2px 2px -1px rgba(15, 31, 36, 0.55), 0px 2px 70px -2px rgba(15, 31, 36, 0.25);
   cursor: pointer;
 }
-body .wrap {
-  display: grid;
-  grid-template-columns: repeat(8, 12.5%);
-  grid-template-rows: repeat(8, 12.5%);
-  background: #0d1221;
-  overflow: hidden;
-  box-shadow: 0 20px 20px -10px rgba(0, 0, 0, 0.5);
+.artwork__typography {
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  padding: 7vmin;
+  mix-blend-mode: multiply;
+  box-shadow: 0px -4px 0px rgba(133, 156, 173, 0.4) inset;
 }
-body .wrap .cell {
-  position: relative;
-  opacity: calc(var(--size) - 1);
-  -webkit-filter: var(--filter);
-          filter: var(--filter);
+.artwork__number {
+  color: #242628;
+  font-size: 8vmin;
+  letter-spacing: -0.005em;
+  font-weight: 700;
 }
-body .wrap .cell.one {
-  -webkit-transform: rotate(var(--angle));
-          transform: rotate(var(--angle));
-  z-index: 2;
+.artwork__header {
+  margin-top: 23vmin;
 }
-body .wrap .cell.one:before {
-  content: '';
-  position: absolute;
-  width: calc(var(--size)*100%);
-  height: calc(var(--size)*100%);
-  background: radial-gradient(circle at top right, var(--color2) -50%, transparent 75%);
+.artwork__title {
+  color: #242628;
+  font-size: 8vmin;
+  letter-spacing: -0.005em;
+  line-height: 1em;
+  margin-left: -0.07em;
 }
-body .wrap .cell.two, body .wrap .cell.four, body .wrap .cell.five, body .wrap .cell.six, body .wrap .cell.seven {
-  -webkit-transform: rotate(var(--angle));
-          transform: rotate(var(--angle));
-  z-index: 0;
-}
-body .wrap .cell.two:before, body .wrap .cell.four:before, body .wrap .cell.five:before, body .wrap .cell.six:before, body .wrap .cell.seven:before {
-  content: '';
-  position: absolute;
-  width: calc(var(--size)*100%);
-  height: calc(var(--size)*100%);
-  background: linear-gradient(45deg, var(--color1), var(--color2));
-}
-body .wrap .cell.two:after, body .wrap .cell.four:after, body .wrap .cell.five:after, body .wrap .cell.six:after, body .wrap .cell.seven:after {
-  content: '';
-  opacity: calc(var(--size) - 1);
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: var(--color3);
-  left: calc((var(--size)*50%) - 5px);
-  top: calc((var(--size)*50%) - 5px);
-  z-index: 2;
-  border-radius: 100%;
-}
-body .wrap .cell.three {
-  -webkit-transform: rotate(var(--angle)) translateX(calc(var(--position) * 100%));
-          transform: rotate(var(--angle)) translateX(calc(var(--position) * 100%));
-  z-index: 2;
-}
-body .wrap .cell.three:before {
-  content: '•••';
-  left: 0;
-  top: -25px;
-  position: absolute;
-  font-size: 200px;
-  line-height: 0;
-  color: transparent;
-  text-decoration: underline;
-  -webkit-text-decoration-style: wavy;
-          text-decoration-style: wavy;
-  -webkit-text-decoration-color: var(--color1);
-          text-decoration-color: var(--color1);
-  -webkit-transform: scaleY(0.75);
-          transform: scaleY(0.75);
-}
-body .wrap .cell.three:after {
-  content: '';
-  position: absolute;
-  color: #ff2d62;
-  width: 18px;
-  height: 18px;
-  background: var(--color1);
-  top: 41px;
-  left: -9px;
-  border-radius: 100%;
-  box-shadow: 171px 0 0 0 var(--color1), 0 5px 20px 5px var(--color3), 0 0 0 20px var(--color2);
-  z-index: -1;
-}
-body .wrap .cell.four:before {
-  border-radius: var(--radius1) 0 0;
-}
-body .wrap .cell.four:after {
-  opacity: 0;
-}
-body .wrap .cell.five:before, body .wrap .cell.eight:before {
-  background: linear-gradient(135deg, #000000, transparent), repeating-linear-gradient(45deg, var(--color1) 1px, transparent 1px, transparent 5px, var(--color1) 5px, var(--color1) 7px);
-}
-body .wrap .cell.five:after, body .wrap .cell.eight:after {
-  opacity: 0;
-}
-body .wrap .cell.six:before, body .wrap .cell.seven:before {
-  background: var(--color1);
-  border-radius: 100%;
-  -webkit-transform: translateX(calc(var(--position) * 50%)) rotate(var(--angle));
-          transform: translateX(calc(var(--position) * 50%)) rotate(var(--angle));
-  width: calc(var(--size)*75%);
-  height: calc(var(--size)*75%);
-}
-body .wrap .cell.six:after, body .wrap .cell.seven:after {
-  background: var(--color1);
-  border-radius: 100%;
-  -webkit-transform: translateX(calc(var(--size) * -50%)) translateY(calc(var(--size) * -50%)) rotate(var(--angle));
-          transform: translateX(calc(var(--size) * -50%)) translateY(calc(var(--size) * -50%)) rotate(var(--angle));
-  width: calc(var(--size)*75%);
-  height: calc(var(--size)*75%);
-}
-body .wrap .cell.seven:before, body .wrap .cell.seven:after {
-  width: calc(var(--size)*200%);
-  height: calc(var(--size)*200%);
-  border-radius: 0px;
-  background: linear-gradient(135deg, #000000, transparent), repeating-linear-gradient(45deg, var(--color1) 1px, transparent 1px, transparent 5px, var(--color1) 5px, var(--color1) 7px);
+.artwork__subtitle {
+  font-size: 4vmin;
+  letter-spacing: 0.008em;
+  line-height: 0.8em;
+  margin-top: 1.5vmin;
 }
 
     </style>
@@ -162,713 +132,249 @@ body .wrap .cell.seven:before, body .wrap .cell.seven:after {
 </script>
 </head>
 <body translate="no">
-<div id='outer'>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
+<div class="background" id="shadow"></div>
+<div class="message">
+<div class="message__instructions">â–² press to regenerate</div>
 </div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
- <div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-</div>
-<div class='wrap'>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
-<div class='cell'></div>
+<div class="flex-container">
+<div class="artwork">
+<canvas class="artwork__canvas" id="main-canvas"></canvas>
 </div>
 </div>
-<svg id='filters' version='1.1' xmlns='http://www.w3.org/2000/svg'>
-<defs>
-<filter id='wave0'>
-<feturbulence basefrequency='1 20' id='turbulence' numoctaves='3' result='noise' seed='23'></feturbulence>
-<fedisplacementmap id='displacement' in2='noise' in='SourceGraphic' scale='150'></fedisplacementmap>
-</filter>
-<filter id='wave1'>
-<feturbulence basefrequency='1 10' id='turbulence' numoctaves='1' result='noise' seed='23'></feturbulence>
-<fedisplacementmap id='displacement' in2='noise' in='SourceGraphic' scale='100'></fedisplacementmap>
-</filter>
-<filter id='wave2'>
-<feturbulence basefrequency='1 10' id='turbulence' numoctaves='1' result='noise' seed='13'></feturbulence>
-<fedisplacementmap id='displacement' in2='noise' in='SourceGraphic' scale='100'></fedisplacementmap>
-</filter>
-</defs>
-</svg>
 <script src="https://static.codepen.io/assets/common/stopExecutionOnTimeout-de7e2ef6bfefd24b79a3f68b414b87b8db5b08439cac3f1012092b2290c719cd.js"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
+<script src='https://unpkg.com/delaunator'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.js'></script>
+<script src='https://unpkg.com/tinycolor2'></script>
 <script id="rendered-js">
-      var colors = [
-"#0d49ff",
-"#3bddff",
-"#ff2d62",
-"#000000",
-"#e2e2eb",
-"#0d1221",
-"#fff",
-'#e2e2eb',
-'transparent'];
+      console.clear();
+const styles = {
+  default: {
+    strokeStyle: '#000000',
+    fillStyle: '#FFFFFF',
+    lineWidth: 2,
+    lineJoin: 'round',
+    lineCap: 'round' } };
 
 
-var classes = [
-"one",
-"two",
-"three",
-"four",
-"five",
-"six",
-"seven",
-"eight"];
+class BaseCanvas {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d');
+    this.time = 0;
+    this._lastKnownRect = this.canvas.getBoundingClientRect();
+    this._playing = false;
+    this._updateFunction = this.update.bind(this);
+    this._timeoutToken = null;
 
-
-
-
-
-function draw() {
-  setTimeout(function () {
-    $("#wrap").removeClass("hide");
-    $(".cell").removeClass(classes);
-    $(".wrap .cell").each(function () {
-      $(this).addClass(classes[~~(Math.random() * classes.length)]);
+    //init
+    this.handleResize();
+    this.canvas.addEventListener('click', event => {
+      window.clearTimeout(this._timeoutToken);
+      this.draw();
     });
-    $(".cell").each(function () {
-      $(this).
-      get(0).
-      style.setProperty(
-      "--color1",
-      colors[Math.floor(Math.random() * colors.length)]);
+    window.addEventListener('resize', _.debounce(event => {
+      this.handleResize(event);
+      this.draw();
+    }, 150));
+  }
+  draw() {
+    this.ctx.clearRect(0, 0, this.width, this.height);
+  }
+  handleResize(event) {
+    const dpr = window.devicePixelRatio;
+    const domRect = this.canvas.getBoundingClientRect();
+    this.canvas.width = domRect.width * dpr;
+    this.canvas.height = domRect.height * dpr;
+    this._lastKnownRect = domRect;
+  }
+  update(timestamp) {
+    if (this._playing) {
+      window.requestAnimationFrame(this._updateFunction);
+    }
+    this.timestamp = timestamp;
+    this.draw();
+  }
+  play() {
+    this._playing = true;
+    window.requestAnimationFrame(this._updateFunction);
+  }
+  pause() {
+    this._playing = false;
+    window.cancelAnimationFrame(this._updateFunction);
+  }
+  updateInterval(interval, nTimes, depth = 0) {
+    this.update();
+    window.clearTimeout(this._timeoutToken);
+    if (depth < nTimes) {
+      this._timeoutToken = window.setTimeout(() => {
+        this.updateInterval(interval, nTimes, depth + 1);
+      }, interval);
+    }
+  }
+  get width() {
+    return this._lastKnownRect.width * window.devicePixelRatio;
+  }
+  get height() {
+    return this._lastKnownRect.height * window.devicePixelRatio;
+  }}
 
 
-      $(this).
-      get(0).
-      style.setProperty(
-      "--color2",
-      colors[Math.floor(Math.random() * colors.length)]);
+function modulus(number, range) {
+  return (number % range + range) % range;
+}
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+function subdivide(points, octaves = 1, closed = true, depth = 1) {
+  const result = [points[0]];
+  for (var i = 1; i < points.length; i++) {
+    var last = points[i - 1];
+    var current = points[i];
+    result.push(
+    [(last[0] + current[0]) / 2, (last[1] + current[1]) / 2],
+    current);
 
-
-      $(this).
-      get(0).
-      style.setProperty(
-      "--color3",
-      colors[Math.floor(Math.random() * colors.length)]);
-
-
-      $(this).
-      get(0).
-      style.setProperty("--radius1", Math.floor(Math.random() * 2) * 50 + "vw");
-
-      $(this).
-      get(0).
-      style.setProperty("--size", Math.floor(Math.random() * 2) + 1);
-
-      $(this).
-      get(0).
-      style.setProperty("--filter", 'url("#wave' + Math.floor(Math.random() * 3) + '")');
-
-      $(this).
-      get(0).
-      style.setProperty("--position", Math.floor(Math.random() * 2) + 1);
-
-      $(this).
-      get(0).
-      style.setProperty("--angle", Math.floor(Math.random() * 4) * 90 + "deg");
-
-    });
-  }, 0);
+  }
+  if (closed) {
+    const first = points[0];
+    const last = points[points.length - 1];
+    result.push([(last[0] + first[0]) / 2, (last[1] + first[1]) / 2]);
+  }
+  if (depth >= octaves) {
+    return result;
+  } else {
+    return subdivide(result, octaves, closed, depth + 1);
+  }
 }
 
-$(function () {
-  draw();
-  var animate = 1;
-  $("body").on("click", function () {
-    draw();
-    animate = 0;
-  });
-  setInterval(function () {
-    if (animate == 1) {
-      draw();
+
+
+class DelaunayBlob {
+  constructor(options) {
+    options = _.defaults({}, options, {
+      x: 0,
+      y: 0,
+      width: 400,
+      height: 400,
+      hueRange: [180, 200],
+      numberOfPoints: 35,
+      rotation: 0 });
+
+
+    this.x = options.x;
+    this.y = options.y;
+    this.width = options.width;
+    this.height = options.height;
+    this.rotation = options.rotation;
+    this.hueRange = options.hueRange;
+    this.triangles = null;
+    this.points = Array(options.numberOfPoints).fill().map(() => [
+    _.random(0, options.width, true),
+    _.random(0, options.height, true)]);
+
+    this.delaunay = Delaunator.from(this.points);
+    this.updateTriangles();
+  }
+  updateTriangles() {
+    this.triangles = this.delaunay.triangles;
+  }
+  draw(ctx) {
+    const { points, triangles, x, y, width, height, hueRange } = this;
+    Object.assign(ctx, styles.default);
+
+    ctx.save();
+    ctx.rotate(this.rotation);
+    ctx.translate(x, y);
+
+    for (var i = 0; i < triangles.length; i += 3) {
+      var a = points[triangles[i + 0]];
+      var b = points[triangles[i + 1]];
+      var c = points[triangles[i + 2]];
+
+      // not sure of the math here
+      var centroid = [
+      (a[0] + b[0] + c[0]) / 3,
+      (a[1] + b[1] + c[1]) / 3];
+
+      // I know that's not a valid saturation, deal with it (âŒœâ—¼â— â—¼)
+      var color = tinycolor({
+        h: lerp(hueRange[0], hueRange[1], centroid[0] / width),
+        s: centroid[1] / height * 170,
+        l: 50 });
+
+      ctx.fillStyle = color.toHexString();
+      ctx.strokeStyle = color.lighten(5).saturate(15).toHexString();
+
+      ctx.beginPath();
+      ctx.moveTo(x + a[0], y + a[1]);
+      ctx.lineTo(x + b[0], y + b[1]);
+      ctx.lineTo(x + c[0], y + c[1]);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
     }
-  }, 1500);
-});
+
+    ctx.restore();
+  }}
+
+
+
+
+class Canvas extends BaseCanvas {
+  constructor(canvas) {
+    super(canvas);
+    this.shapes = this.getShapes();
+    this.shadow = document.getElementById('shadow');
+  }
+  getShapes() {
+    const longThins = Array(20).fill().map(() => {
+      var hue = _.sample([280, 330]) + _.random(-3, 1);
+      var blob = new DelaunayBlob({
+        x: _.random(0.1 * this.width, 1.0 * this.height),
+        y: _.random(0.1 * this.width, 0.3 * this.height),
+        // multiply both by width intentionally to preserve square proportions
+        width: _.random(0.25 * this.width, 0.35 * this.width),
+        height: _.random(0.90 * this.width, 1.50 * this.width),
+        hueRange: [
+        hue,
+        hue + _.random(0, 20)],
+
+        rotation: _.random(Math.PI * -0.12, Math.PI * 0.12) });
+
+      return blob;
+    });
+
+    const smallBlobs = Array(10).fill().map(() => {
+      var hue = _.sample([280, 330]) + _.random(-3, 1);
+      var blob = new DelaunayBlob({
+        x: _.random(-0.1 * this.width, 0.3 * this.height),
+        y: _.random(-0.2 * this.width, 0.15 * this.height),
+        // multiply both by width intentionally to preserve square proportions
+        width: _.random(0.25 * this.width, 0.35 * this.width),
+        height: _.random(0.25 * this.width, 0.35 * this.width),
+        hueRange: [
+        hue,
+        hue + _.random(0, 20)],
+
+        numberOfPoints: 10,
+        rotation: _.random(Math.PI * -0.22, Math.PI * 0.12) });
+
+      return blob;
+    });
+    return longThins.concat(smallBlobs);
+  }
+  draw() {
+    this.shapes = this.getShapes();
+    super.draw();
+    this.ctx.clearRect(0, 0, this.width, this.height);
+
+    this.shapes.forEach(shape => {shape.draw(this.ctx, this._lastKnownRect);});
+    this.shadow.style.backgroundImage = `url(${this.canvas.toDataURL()})`;
+  }}
+
+
+const canvas = new Canvas(document.getElementById('main-canvas'));
+canvas.updateInterval(600, 5);
       //# sourceURL=pen.js
     </script>
 </body>
